@@ -7,11 +7,17 @@ package frc.robot.subsystems;
 import java.io.File;
 import java.util.function.DoubleSupplier;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +32,8 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveDriveSubsystem extends SubsystemBase {
 
   private final SwerveDrive swerve;
+
+  private SwerveDriveKinematics kinematics;
 
   private SlewRateLimiter translationLimiter = new SlewRateLimiter(Units.feetToMeters(14.5));
   private SlewRateLimiter strafeLimiter = new SlewRateLimiter(Units.feetToMeters(14.5));
@@ -48,6 +56,22 @@ public class SwerveDriveSubsystem extends SubsystemBase {
           ).createSwerveDrive(
             Units.feetToMeters(SwerveConstants.MAX_SPEED)
           );
+
+      // Configure the AutoBuilder //
+      AutoBuilder.configureHolonomic(
+        this::getPose,
+        this::resetOdometry,
+        this::getRobotRelativeSpeeds,
+        this::driveRobotRelative,
+        new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
+            4.5, // Max module speed, in m/s
+            0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+            new ReplanningConfig() // Default path replanning config. See the API for the options here
+        ),
+        this);
+        
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -65,29 +89,29 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     DoubleSupplier rotationSup
   ) {
     return run(() -> {
-          double translation = translationSup.getAsDouble();
-          double strafe = strafeSup.getAsDouble();
-          double rotation = rotationSup.getAsDouble();
-          double translationVal =
-              translationLimiter.calculate(
-                  MathUtil.applyDeadband(
-                      translation, Constants.GeneralConstants.swerveDeadband));
-          double strafeVal =
-              strafeLimiter.calculate(
-                  MathUtil.applyDeadband(
-                      strafe, Constants.GeneralConstants.swerveDeadband));
-          double rotationVal =
-              rotationLimiter.calculate(
-                  MathUtil.applyDeadband(
-                      rotation, Constants.GeneralConstants.swerveDeadband));
+        double translation = translationSup.getAsDouble();
+        double strafe = strafeSup.getAsDouble();
+        double rotation = rotationSup.getAsDouble();
+        double translationVal =
+            translationLimiter.calculate(
+                MathUtil.applyDeadband(
+                    translation, Constants.GeneralConstants.swerveDeadband));
+        double strafeVal =
+            strafeLimiter.calculate(
+                MathUtil.applyDeadband(
+                    strafe, Constants.GeneralConstants.swerveDeadband));
+        double rotationVal =
+            rotationLimiter.calculate(
+                MathUtil.applyDeadband(
+                    rotation, Constants.GeneralConstants.swerveDeadband));
 
-          drive(
-              new Translation2d(translationVal, strafeVal).times(SwerveConstants.MAX_SPEED),
-              rotationVal * swerve.swerveController.config.maxAngularVelocity,
-              true,
-              false);
-        })
-        .withName("TeleopSwerve");
+        drive(
+            new Translation2d(translationVal, strafeVal).times(SwerveConstants.MAX_SPEED),
+            rotationVal * swerve.swerveController.config.maxAngularVelocity,
+            true,
+            false);
+      })
+      .withName("TeleopSwerve");
   }
 
   public void drive(
@@ -125,6 +149,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
   public Pose2d getPose() {
     return swerve.getPose();
+  }
+
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return swerve.getRobotVelocity();
+  }
+
+  public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+    ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+
+    swerve.drive(targetSpeeds);
   }
 
   @Override

@@ -11,6 +11,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.pathplanner.lib.pathfinding.Pathfinding;
+
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,6 +35,9 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotInit() {
+
+    // PathFinder and AdvantageKit Compatibility //
+    Pathfinding.setPathfinder(new LocalADStarAK());
 
     // Instantiate our AdvantageKit Logger //
 
