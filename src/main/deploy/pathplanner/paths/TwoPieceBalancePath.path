@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4220333895241186,
-        "y": 4.7915348557941915
+        "x": 2.4222730686107483,
+        "y": 4.773316092083936
       },
       "isLocked": false,
       "linkedName": null
@@ -79,7 +79,7 @@
             {
               "type": "wait",
               "data": {
-                "waitTime": 0.5
+                "waitTime": 2.0
               }
             }
           ]
@@ -96,7 +96,7 @@
             {
               "type": "wait",
               "data": {
-                "waitTime": 1.0
+                "waitTime": 2.0
               }
             }
           ]
@@ -113,7 +113,7 @@
             {
               "type": "wait",
               "data": {
-                "waitTime": 1.0
+                "waitTime": 2.0
               }
             }
           ]

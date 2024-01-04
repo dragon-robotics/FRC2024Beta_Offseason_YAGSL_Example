@@ -12,6 +12,8 @@ import frc.robot.subsystems.SwerveDriveSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,12 +49,12 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    // Register Named Commands //
-    NamedCommands.registerCommand("TwoPieceBalance", getAutonomousCommand());
-
     // Init Auto Chooser //
     autoChooser = AutoBuilder.buildAutoChooser("TwoPieceBalance");
     SmartDashboard.putData("TwoPieceBalance", autoChooser);
+
+    // Register Named Commands //
+    NamedCommands.registerCommand("TwoPieceBalance", new PathPlannerAuto("TwoPieceBalance"));
   }
 
   /**
@@ -96,5 +98,6 @@ public class RobotContainer {
     // An example command will be run in autonomous
     // return Autos.exampleAuto(m_exampleSubsystem);
     return autoChooser.getSelected();
+    // return new PathPlannerAuto("TwoPieceBalance");
   }
 }

@@ -63,6 +63,7 @@
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Pigeon 2 [0]": "Gyro",
       "/SmartDashboard/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/TwoPieceBalance": "String Chooser",
       "/SmartDashboard/navX-Sensor[1]": "Gyro"
     },
     "windows": {
@@ -86,6 +87,14 @@
   },
   "NetworkTables": {
     "transitory": {
+      "AdvantageKit": {
+        "PowerDistribution": {
+          "open": true
+        }
+      },
+      "PathPlanner": {
+        "open": true
+      },
       "SmartDashboard": {
         "open": true,
         "swerve": {
